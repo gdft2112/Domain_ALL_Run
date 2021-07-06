@@ -31,8 +31,6 @@ jobs:
           GO111MODULE: on
         run: |
           go get -v github.com/projectdiscovery/httpx/cmd/httpx
-          sudo apt install zip
-          wget https://github.com/knownsec/ksubdomain/releases/download/v0.7/ksubdomain_linux.zip|unzip ksubdomain_linux.zip
         shell: bash
 
       - name: Running Scanner
