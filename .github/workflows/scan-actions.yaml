@@ -1,0 +1,51 @@
+name: scan-actions
+
+on:
+#    schedule:
+#      - cron: '0 0 * * *'
+# Remove both comments to run this action on daily basis.
+    workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@master
+
+      - name: Setup golang
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.14
+
+      - name: Cache Go
+        id: cache-go
+        uses: actions/cache@v2
+        with:
+          path: /home/runner/go
+          key: ${{ runner.os }}-go
+
+      - name: Setting up ProjectDiscovery tools
+        if: steps.cache-go.outputs.cache-hit != 'true'
+        env:
+          GO111MODULE: on
+        run: |
+          go get -v github.com/projectdiscovery/httpx/cmd/httpx
+          wget https://github.com/knownsec/ksubdomain/releases/download/v0.7/ksubdomain_linux.zip|unzip ksubdomain_linux.zip
+        shell: bash
+
+      - name: Running Scanner
+        run: |
+          for i in ${cat input/domains.txt};do sudo ./ksubdomain -d $1 -l 2 -silent|grep $1|tee output/$1.txt && sudo ./ksubdomain -d $1 -f domaindict-170W.txt -silent|grep $1|tee -a output/$1.txt & cat /output/$1.txt|httpx|tee output/$1_Alive.txt;done
+        shell: bash
+        
+      - name: Commit results to Github
+        run: |
+          git config --local user.email "xxx@xxx.io"
+          git config --global user.name "xxx"
+          git commit -m "Scan-Actions report" -a --allow-empty
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
