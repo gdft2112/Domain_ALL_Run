@@ -35,7 +35,7 @@ jobs:
 
       - name: Running Scanner
         run: |
-          for i in $(cat input/domains.txt);do sudo ./input/ksubdomain -d $1 -l 2 -silent|grep $1|tee output/$1.txt && sudo ./input/ksubdomain -d $1 -f domaindict-170W.txt -silent|grep $1|tee -a output/$1.txt & cat /output/$1.txt|httpx|tee output/$1_Alive.txt;done
+          for i in $(cat input/domains.txt);do sudo input/ksubdomain -d $1 -l 2 -silent|grep $1|tee output/$1.txt && sudo input/ksubdomain -d $1 -f domaindict-170W.txt -silent|grep $1|tee -a output/$1.txt & cat /output/$1.txt|httpx|tee output/$1_Alive.txt;done
         shell: bash
         
       - name: Commit results to Github
